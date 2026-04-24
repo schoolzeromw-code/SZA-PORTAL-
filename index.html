@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SZA | Institutional Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --unima-green: #007055;
+            --sza-blue: #4a90e2;
+            --sidebar-gray: #1e293b;
+            --light-bg: #f1f5f9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: var(--light-bg); color: #334155; }
+
+        /* --- NAVIGATION & SIDEBAR --- */
+        .top-nav { background: var(--unima-green); height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; color: white; position: fixed; width: 100%; z-index: 1000; }
+        
+        .sidebar { width: 240px; background: var(--sidebar-gray); height: 100vh; position: fixed; top: 0; padding-top: 80px; transition: 0.3s; }
+        .sidebar a { display: flex; align-items: center; gap: 12px; padding: 15px 25px; color: #cbd5e1; text-decoration: none; font-size: 14px; transition: 0.3s; border-left: 4px solid transparent; cursor: pointer; }
+        .sidebar a:hover, .sidebar a.active { background: #334155; color: white; border-left-color: var(--sza-blue); }
+
+        .content { margin-left: 240px; padding: 80px 30px 30px; }
+
+        /* --- CARDS & UI --- */
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 3px solid var(--unima-green); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+
+        /* --- AI ASSISTANT PANEL --- */
+        #ai-panel { border: 1px solid var(--sza-blue); background: #f0f7ff; }
+        .ai-chat-box { height: 150px; background: white; border-radius: 4px; padding: 10px; overflow-y: auto; font-size: 13px; margin-bottom: 10px; border: 1px solid #d1e2f3; }
+
+        /* --- INVOICE GENERATOR --- */
+        .invoice-tool input, .invoice-tool select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        #invoice-result { background: #fff; padding: 20px; border: 1px solid #000; font-family: 'Courier New', Courier, monospace; display: none; }
+
+        /* --- LOGIN GATEWAY (From your screenshot) --- */
+        #login-overlay { position: fixed; inset: 0; background: #e9ecef; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; width: 400px; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .login-box h2 { color: var(--sza-blue); font-weight: 300; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; text-align: center; }
+
+        .hidden { display: none !important; }
+        .btn-action { background: var(--unima-green); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <header class="top-nav">
+        <div style="font-weight: bold; letter-spacing: 1px;">SZA INSTITUTIONAL PORTAL</div>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <i class="fa-solid fa-headset"></i> Support: 0893110685
+            <button onclick="location.reload()" style="background:none; border:1px solid white; color:white; padding:4px 10px; border-radius:4px; cursor:pointer;">Logout</button>
+        </div>
+    </header>
+
+    <nav class="sidebar">
+        <a onclick="showView('student')" id="side-student"><i class="fa-solid fa-graduation-cap"></i> Student Moodle</a>
+        <a onclick="showView('staff')" id="side-staff"><i class="fa-solid fa-user-tie"></i> Staff Portal</a>
+        <a onclick="showView('library')" id="side-library"><i class="fa-solid fa-book"></i> Digital Library</a>
+        <a href="https://wa.me/265893110685" target="_blank"><i class="fa-brands fa-whatsapp"></i> WhatsApp Support</a>
+    </nav>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>Please Enter Your Information</h2>
+            <div style="margin-bottom:15px; position:relative;">
+                <input type="text" placeholder="Username" style="width:100%; padding:12px; border:1px solid #ccc;">
+                <i class="fa-solid fa-user" style="position:absolute; right:15px; top:13px; color:#999;"></i>
+            </div>
+            <div style="margin-bottom:15px; position:relative;">
+                <input type="password" placeholder="Password" style="width:100%; padding:12px; border:1px solid #ccc;">
+                <i class="fa-solid fa-lock" style="position:absolute; right:15px; top:13px; color:#999;"></i>
+            </div>
+            <button class="btn-action" style="background:#4a90e2;" onclick="login()">Login</button>
+        </div>
+    </div>
+
+    <main class="content hidden" id="main-ui">
+        
+        <div id="view-student">
+            <h2 style="margin-bottom:20px;">Student Dashboard</h2>
+            <div class="grid">
+                <div class="card"><h3>Active Courses</h3><p>MSCE Computer Studies</p></div>
+                <div class="card"><h3>Quiz Timeline</h3><p>No pending activities.</p></div>
+            </div>
+        </div>
+
+        <div id="view-staff" class="hidden">
+            <h2 style="margin-bottom:20px;">Staff Information System</h2>
+            
+            <div class="grid">
+                <div class="card" id="ai-panel">
+                    <h3><i class="fa-solid fa-robot"></i> SZA AI Assistant</h3>
+                    <div class="ai-chat-box" id="ai-chat">
+                        <p style="color:#666;">AI: Hello. How can I assist with academic management today?</p>
+                    </div>
+                    <input type="text" id="ai-input" placeholder="Ask AI (e.g. summarize grades)" style="width:100%; padding:8px;">
+                    <button class="btn-action" style="margin-top:10px;" onclick="askAI()">Send Query</button>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fa-solid fa-file-invoice-dollar"></i> Invoice Generator</h3>
+                    <div class="invoice-tool">
+                        <input type="text" id="inv-name" placeholder="Student Name">
+                        <input type="number" id="inv-amount" placeholder="Amount (MWK)">
+                        <select id="inv-type">
+                            <option>Tuition Fees</option>
+                            <option>Examination Fees</option>
+                            <option>Library Fines</option>
+                        </select>
+                        <button class="btn-action" onclick="generateInvoice()">Generate & Print</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="invoice-result" class="card" style="margin-top:20px;"></div>
+        </div>
+
+        <div id="view-library" class="hidden">
+            <h2 style="margin-bottom:20px;">SZA Institutional Library</h2>
+            <div class="grid">
+                <div class="card"><h4>Biology Notes</h4><button class="btn-action">Download PDF</button></div>
+                <div class="card"><h4>English Past Papers</h4><button class="btn-action">Download PDF</button></div>
+                <div class="card"><h4>Staff Handbook</h4><button class="btn-action">Download PDF</button></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- System Logic ---
+        function login() {
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('main-ui').classList.remove('hidden');
+        }
+
+        function showView(view) {
+            document.getElementById('view-student').classList.add('hidden');
+            document.getElementById('view-staff').classList.add('hidden');
+            document.getElementById('view-library').classList.add('hidden');
+
+            if (view === 'staff') {
+                let pass = prompt("Enter Staff Authorization Code:");
+                if(pass === "SZA2026") {
+                    document.getElementById('view-staff').classList.remove('hidden');
+                } else {
+                    alert("Unauthorized Access.");
+                    document.getElementById('view-student').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('view-' + view).classList.remove('hidden');
+            }
+        }
+
+        // --- AI Logic ---
+        function askAI() {
+            let input = document.getElementById('ai-input').value;
+            let chat = document.getElementById('ai-chat');
+            if(!input) return;
+            chat.innerHTML += `<p><b>You:</b> ${input}</p>`;
+            setTimeout(() => {
+                chat.innerHTML += `<p style="color:var(--unima-green)"><b>AI:</b> Processing institutional data for "${input}"...</p>`;
+                chat.scrollTop = chat.scrollHeight;
+            }, 600);
+            document.getElementById('ai-input').value = "";
+        }
+
+        // --- Invoice Logic ---
+        function generateInvoice() {
+            let name = document.getElementById('inv-name').value;
+            let amt = document.getElementById('inv-amount').value;
+            let type = document.getElementById('inv-type').value;
+            let res = document.getElementById('invoice-result');
+
+            if(!name || !amt) { alert("Fill all fields"); return; }
+
+            res.style.display = "block";
+            res.innerHTML = `
+                <div style="text-align:center;">
+                    <h3>SCHOOL ZERO ACADEMY</h3>
+                    <p>OFFICIAL FEE INVOICE</p>
+                    <hr>
+                </div>
+                <p><b>Date:</b> ${new Date().toLocaleDateString()}</p>
+                <p><b>Student:</b> ${name}</p>
+                <p><b>Description:</b> ${type}</p>
+                <p><b>Total Amount:</b> MWK ${amt}</p>
+                <hr>
+                <p style="font-size:10px;">Contact Support: 0893110685</p>
+                <button onclick="window.print()" style="margin-top:10px;">Print Invoice</button>
+            `;
+        }
+    </script>
+</body>
+  </html>
+              
